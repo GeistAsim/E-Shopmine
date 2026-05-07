@@ -155,7 +155,7 @@ async def search_row(query, current_user: current_active_user):
         rows = home_entitys(data)
 
         # search titles
-        searchTitles = ["id", "Name", "Contact", "Application_ID", "Service", "Service_Type"]
+        searchTitles = ["Name", "Contact", "Application_ID", "Service", "Service_Type", "Month"]
 
         # make a index, which is categorized data based on search titles
         for row in rows:
