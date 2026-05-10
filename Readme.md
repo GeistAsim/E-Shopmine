@@ -87,7 +87,7 @@ Mongo_DB_DEBUG=False
 
 # frontend server connection
 self_connect=http://localhost:5173
-local_connect=http://192.168.29.57:5173
+local_connect=http://values:5173
 global_connect=values
 ```
 - Place Another one in Frontend Folder
