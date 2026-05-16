@@ -20,10 +20,10 @@ function App() {
 
   const [notification, setNotification] = useState({
     "show": false,
+    "is_error": false,
     "status_code": "",
     "message": ""
   })
-  console.log(notification)
 
 
   useEffect(() => {

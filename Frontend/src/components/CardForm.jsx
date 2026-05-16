@@ -3,9 +3,10 @@ import { useContext } from 'react';
 import { MdModeEdit } from "react-icons/md";
 import { ContainerContext } from '../Context/context';
 import { useNavigate } from 'react-router-dom';
+import { Notification } from './Notification';
 
 export const CardForm = () => {
-    const { API_Connect, oldData, setoldData, access_token } = useContext(ContainerContext)
+    const { API_Connect, oldData, setoldData, access_token, notification, setNotification } = useContext(ContainerContext)
 
     // home page pointer
     const navigate = useNavigate();
@@ -36,7 +37,15 @@ export const CardForm = () => {
                 body: JSON.stringify(oldData)
             })
 
-            if (!res.ok) throw new Error(`Log at ID ${oldData.id} not updated!`)
+            if (!res.ok) {
+                setNotification({
+                    ...notification,
+                    "is_error": true,
+                    "status_code": res.status,
+                    "message": res.statusText
+                })
+                throw new Error(`Log at ID ${oldData.id} not updated!`)
+            }
 
             let newData = await res.json()
 
@@ -51,6 +60,14 @@ export const CardForm = () => {
             console.error(`Error in Updating error: ${err}`)
         }
     };
+
+    if (notification.is_error) {
+        setTimeout(() => {
+            window.location.reload()
+        }, 5000);
+
+        return <Notification />
+    }
 
 
     return (

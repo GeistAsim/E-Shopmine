@@ -38,7 +38,7 @@ export const Home = () => {
                     console.log("Unable to connect HomeDataBase!");
                     setNotification({
                         ...notification,
-                        "show": true,
+                        "is_error": true,
                         "status_code": res.status,
                         "message": res.statusText
                     })
@@ -70,9 +70,22 @@ export const Home = () => {
                 body: JSON.stringify(delete_log_ID)
             });
 
-            if (!res.ok) throw Error("log not delete");
+            if (!res.ok) {
+                setNotification({
+                    ...notification,
+                    "is_error": true,
+                    "status_code": res.status,
+                    "message": res.statusText
+                })
+                throw new Error("log not delete")
+            };
 
             let delete_res = await res.json();
+            setNotification({
+                ...notification,
+                "status_code": res.status,
+                "message": res.statusText
+            })
             return delete_res;
         }
         catch (err) {
@@ -99,10 +112,12 @@ export const Home = () => {
         }
     }
 
-    if (notification.show) {
-        return <>
-        <Notification />
-        </>
+    if (notification.is_error) {
+        setTimeout(() => {
+            window.location.reload()
+        }, 5000);
+
+        return <Notification />
     }
 
 

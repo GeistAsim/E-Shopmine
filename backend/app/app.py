@@ -43,7 +43,7 @@ app.add_middleware(
 
 # DataBase Table Selection
 # table_name = 'logs' # if int(os.getenv("SERVER_PORT")) == 8181 else 'test_table'
-collection_name = conn.Shop.test
+collection_name = conn.Shop.logs
 
 # User Session
 @app.get("/user/session")
