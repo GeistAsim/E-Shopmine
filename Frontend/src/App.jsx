@@ -15,6 +15,8 @@ function App() {
   const access_token = localStorage.getItem('token')
   const [authorized, setAuthorized] = useState(false)
   const [loading, setLoading] = useState(!!access_token)
+  const [super_user, setsuper_user] = useState(false)
+  console.log(super_user)
 
   const navigate = useNavigate();
 
@@ -112,7 +114,8 @@ function App() {
             authorized,
             setAuthorized,
             notification,
-            setNotification
+            setNotification,
+            super_user
           }
         }>
 

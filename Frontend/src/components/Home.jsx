@@ -9,7 +9,7 @@ import { Notification } from './Notification';
 
 export const Home = () => {
 
-    const { API_Connect, setoldData, searchData, authorized, access_token, setAuthorized, notification, setNotification } = useContext(ContainerContext)
+    const { API_Connect, setoldData, searchData, authorized, access_token, setAuthorized, notification, setNotification, super_user } = useContext(ContainerContext)
 
     const url = useLocation();
     const navigate = useNavigate();
@@ -161,24 +161,27 @@ export const Home = () => {
                             </div>
 
                             {/* Financials grouped together visually */}
-                            <div className="financials">
-                                <div className="data-row">
-                                    <span className="label">Govt Fee</span>
-                                    <span className="value">₹{row.Govt_Fee}</span>
+                            {super_user? (
+                                <div className="financials">
+                                    <div className="data-row">
+                                        <span className="label">Govt Fee</span>
+                                        <span className="value">₹{row.Govt_Fee}</span>
+                                    </div>
+                                    <div className="data-row">
+                                        <span className="label">Service Fee</span>
+                                        <span className="value">₹{row.Service_Charge}</span>
+                                    </div>
+                                    <div className="data-row total-row">
+                                        <span className="label">Total Fee</span>
+                                        <span className="value">₹{row.Total_Amount}</span>
+                                    </div>
+                                    <div className="data-row due-row">
+                                        <span className="label">Due Amount</span>
+                                        <span className="value">₹{row.Due}</span>
+                                    </div>
                                 </div>
-                                <div className="data-row">
-                                    <span className="label">Service Fee</span>
-                                    <span className="value">₹{row.Service_Charge}</span>
-                                </div>
-                                <div className="data-row total-row">
-                                    <span className="label">Total Fee</span>
-                                    <span className="value">₹{row.Total_Amount}</span>
-                                </div>
-                                <div className="data-row due-row">
-                                    <span className="label">Due Amount</span>
-                                    <span className="value">₹{row.Due}</span>
-                                </div>
-                            </div>
+                            )
+                            : null}
                         </div>
                     </div>
                 ))}
