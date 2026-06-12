@@ -15,5 +15,3 @@ try:
 except Exception as e:
     print("MongoDB Error!")
     print(e)
-
-print(conn)

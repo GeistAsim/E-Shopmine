@@ -19,12 +19,14 @@ class NewUser(BaseModel):
     hashed_password: str
     email: str | None = None
     disabled: bool | None = None
+    super: bool | None = None
 
 # User model
 class User(BaseModel):
     username: str
     email: str | None = None
     disabled: bool | None = None
+    super: bool | None = None
 
 # Login request model
 class LoginRequest(BaseModel):
