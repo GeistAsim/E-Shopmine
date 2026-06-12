@@ -51,8 +51,10 @@ function App() {
 
         if (res.ok) {
           const session_res = await res.json();
-          if (session_res === true) {
+          console.log("session res: ", session_res)
+          if (session_res.active_user === true) {
             setAuthorized(true);
+          
             if (window.location.pathname === '/login') {
               navigate("/");
             }
@@ -61,6 +63,15 @@ function App() {
             localStorage.removeItem('token');
             navigate("/login");
           }
+
+          if (session_res.super === true) {
+            setsuper_user(true)
+          } else {
+            setsuper_user(false)
+          }
+          
+
+
         } else {
           setAuthorized(false);
           localStorage.removeItem('token');

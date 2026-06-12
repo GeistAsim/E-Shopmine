@@ -60,7 +60,7 @@ collection_name = conn.Shop.test
 @app.get("/user/session")
 def user_session(current_user: current_active_user):
     if current_user:
-        return True
+        return {"super": current_user.super, "active_user": True}
     return False
 
 
