@@ -204,14 +204,3 @@ async def delete_all_log(current_user: current_active_user):
             return JSONResponse(content="All documents deleted successfully")
     except Exception as e:
         raise HTTPException(detail=f"Error: {r}", status_code=400)
-
-# Bulk documents adding
-@app.post("/bulk/insertion")
-async def bulk_insertion(current_user: current_active_user):
-    try:
-        with open('data.json', 'r') as bulk_data:
-            content = bulk_data.read()
-            return JSONResponse(content=content, status_code=200)
-
-    except Exception as e:
-        raise HTTPException(detail=f"Error: {e}", status_code=400)

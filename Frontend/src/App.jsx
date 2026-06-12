@@ -14,6 +14,7 @@ function App() {
   const API_Connect = import.meta.env.VITE_API;
   const access_token = localStorage.getItem('token')
   const [authorized, setAuthorized] = useState(false)
+  const [loading, setLoading] = useState(!!access_token)
 
   const navigate = useNavigate();
 
@@ -27,30 +28,53 @@ function App() {
 
 
   useEffect(() => {
-    let UserInSession = async () => {
-      let res = await fetch(`${API_Connect}/user/session`, {
-        method: "GET",
-        headers: {
-          'Authorization': `Bearer ${access_token}`,
-          'Content-Type': 'application/json'
+    const verifySession = async () => {
+      if (!access_token) {
+        setAuthorized(false);
+        setLoading(false);
+        if (window.location.pathname !== '/login') {
+          navigate("/login");
         }
-      });
-
-      let session_res = await res.json();
-
-      if (session_res === true) {
-        navigate("/")
-      }
-      else {
-        navigate("/login")
+        return;
       }
 
-      console.log(session_res)
+      try {
+        const res = await fetch(`${API_Connect}/user/session`, {
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${access_token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      return session_res
-    }
+        if (res.ok) {
+          const session_res = await res.json();
+          if (session_res === true) {
+            setAuthorized(true);
+            if (window.location.pathname === '/login') {
+              navigate("/");
+            }
+          } else {
+            setAuthorized(false);
+            localStorage.removeItem('token');
+            navigate("/login");
+          }
+        } else {
+          setAuthorized(false);
+          localStorage.removeItem('token');
+          navigate("/login");
+        }
+      } catch (err) {
+        console.error("Session verification failed:", err);
+        setAuthorized(false);
+        localStorage.removeItem('token');
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    UserInSession();
+    verifySession();
 
   }, [])
 
@@ -63,6 +87,15 @@ function App() {
   })
   const [searchData, setsearchData] = useState([])
   
+  if (loading) {
+    return (
+      <div className="app-loader">
+        <div className="spinner"></div>
+        <p>Verifying session...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <ContainerContext.Provider
