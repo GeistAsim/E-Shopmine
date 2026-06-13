@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { useContext } from 'react';
 import { ContainerContext } from '../Context/context';
 import { useNavigate } from 'react-router-dom';
+import { Notification } from './Notification';
 
 export const LogForm = () => {
 
-    const { API_Connect, access_token } = useContext(ContainerContext);
+    const { API_Connect, access_token, notification, setNotification } = useContext(ContainerContext);
 
     const navigate = useNavigate();
     const handleRoute = () => {
@@ -57,8 +58,16 @@ export const LogForm = () => {
                 body: JSON.stringify(formData)
 
             })
-            if (!res.ok) throw Error("post request failed!")
-
+            console.log(res)
+            if (!res.ok) {
+                setNotification({
+                    ...notification,
+                    "is_error": true,
+                    "status_code": res.status,
+                    "message": res.statusText
+                });
+                throw new Error("post request failed!")
+            }
             let post_res = await res.json()
 
             // back to home page
@@ -72,7 +81,13 @@ export const LogForm = () => {
 
     };
 
+    if (notification.is_error) {
+        setTimeout(() => {
+            window.location.reload()
+        }, 5000);
 
+        return <Notification />
+    }
 
     return (<>
         <div className={`form-page-container`}>

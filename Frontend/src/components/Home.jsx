@@ -4,11 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ContainerContext } from '../Context/context'
 import { MdModeEdit } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
+import { Notification } from './Notification';
 
 
 export const Home = () => {
 
-    const { API_Connect, setoldData, searchData, authorized, access_token, setAuthorized } = useContext(ContainerContext)
+    const { API_Connect, setoldData, searchData, authorized, access_token, setAuthorized, notification, setNotification, super_user } = useContext(ContainerContext)
 
     const url = useLocation();
     const navigate = useNavigate();
@@ -33,10 +34,14 @@ export const Home = () => {
                         'Content-Type': 'application/json'
                     }
                 });
-                if (!res.ok) console.log("Unable to connect HomeDataBase!");
-                if (res.status === 401) {
-                    navigate('/login')
-                    localStorage.setItem(login_state, false)
+                if (!res.ok || res.status === 401) {
+                    console.log("Unable to connect HomeDataBase!");
+                    setNotification({
+                        ...notification,
+                        "is_error": true,
+                        "status_code": res.status,
+                        "message": res.statusText
+                    })
                 }
 
                 let HomeData = await res.json();
@@ -65,9 +70,22 @@ export const Home = () => {
                 body: JSON.stringify(delete_log_ID)
             });
 
-            if (!res.ok) throw Error("log not delete");
+            if (!res.ok) {
+                setNotification({
+                    ...notification,
+                    "is_error": true,
+                    "status_code": res.status,
+                    "message": res.statusText
+                })
+                throw new Error("log not delete")
+            };
 
             let delete_res = await res.json();
+            setNotification({
+                ...notification,
+                "status_code": res.status,
+                "message": res.statusText
+            })
             return delete_res;
         }
         catch (err) {
@@ -81,9 +99,7 @@ export const Home = () => {
     };
 
     if (delete_doc) {
-        // set(() => {
         delete_log();
-        // }, 500);
     };
 
 
@@ -95,6 +111,15 @@ export const Home = () => {
             navigate("/login")
         }
     }
+
+    if (notification.is_error) {
+        setTimeout(() => {
+            window.location.reload()
+        }, 5000);
+
+        return <Notification />
+    }
+
 
     return (
         <>
@@ -136,24 +161,34 @@ export const Home = () => {
                             </div>
 
                             {/* Financials grouped together visually */}
+                            {super_user? (
+                                <div className="financials">
+                                    <div className="data-row">
+                                        <span className="label">Govt Fee</span>
+                                        <span className="value">₹{row.Govt_Fee}</span>
+                                    </div>
+                                    <div className="data-row">
+                                        <span className="label">Service Fee</span>
+                                        <span className="value">₹{row.Service_Charge}</span>
+                                    </div>
+                                    <div className="data-row total-row">
+                                        <span className="label">Total Fee</span>
+                                        <span className="value">₹{row.Total_Amount}</span>
+                                    </div>
+                                    <div className="data-row due-row">
+                                        <span className="label">Due Amount</span>
+                                        <span className="value">₹{row.Due}</span>
+                                    </div>
+                                </div>
+                            )
+                            : (
                             <div className="financials">
-                                <div className="data-row">
-                                    <span className="label">Govt Fee</span>
-                                    <span className="value">₹{row.Govt_Fee}</span>
-                                </div>
-                                <div className="data-row">
-                                    <span className="label">Service Fee</span>
-                                    <span className="value">₹{row.Service_Charge}</span>
-                                </div>
-                                <div className="data-row total-row">
-                                    <span className="label">Total Fee</span>
-                                    <span className="value">₹{row.Total_Amount}</span>
-                                </div>
                                 <div className="data-row due-row">
                                     <span className="label">Due Amount</span>
                                     <span className="value">₹{row.Due}</span>
                                 </div>
                             </div>
+                            )}
                         </div>
                     </div>
                 ))}

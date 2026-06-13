@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from bson import ObjectId
 from dotenv import load_dotenv
 from app.databases.mongo import conn
-from app.model.model import home_entitys
+from app.model.model import super_home_entitys, home_entitys
 from app.Search.search import SimpleSearchIndex
 from app.schema.schema import CreateLog, UpdateLog, UpdateDue, DocumentID
 from app.auth import auth_router, get_current_active_user, User
@@ -24,6 +24,17 @@ app.include_router(auth_router)
 
 # Current Active User Dependency for methods
 current_active_user = Annotated[User, Depends(get_current_active_user)]
+
+# check weather the user is super or not
+def is_super(current_user, doc_collection):
+    if current_user.super:
+        return super_home_entitys(doc_collection)
+    
+    if not current_user.super:
+        return home_entitys(doc_collection)
+
+    return None
+
 
 # origins
 origins = [
@@ -42,14 +53,13 @@ app.add_middleware(
 )
 
 # DataBase Table Selection
-# table_name = 'logs' # if int(os.getenv("SERVER_PORT")) == 8181 else 'test_table'
-collection_name = conn.Shop.logs
+collection_name = conn.Shop.logs if int(os.getenv("SERVER_PORT")) == 8181 else conn.Shop.test
 
 # User Session
 @app.get("/user/session")
 def user_session(current_user: current_active_user):
     if current_user:
-        return True
+        return {"super": current_user.super, "active_user": True}
     return False
 
 
@@ -57,7 +67,7 @@ def user_session(current_user: current_active_user):
 async def get_logs(current_user: current_active_user):
     # fetch all rows
     docs = collection_name.find()
-    result = home_entitys(docs)
+    result = is_super(current_user, docs)
 
     # if data not found
     if not result:
@@ -152,7 +162,7 @@ async def search_row(query, current_user: current_active_user):
 
         # fetch all documents
         data = collection_name.find()
-        rows = home_entitys(data)
+        rows = is_super(current_user, data)
 
         # search titles
         searchTitles = ["Name", "Contact", "Application_ID", "Service", "Service_Type", "Month"]
@@ -204,14 +214,3 @@ async def delete_all_log(current_user: current_active_user):
             return JSONResponse(content="All documents deleted successfully")
     except Exception as e:
         raise HTTPException(detail=f"Error: {r}", status_code=400)
-
-# Bulk documents adding
-@app.post("/bulk/insertion")
-async def bulk_insertion(current_user: current_active_user):
-    try:
-        with open('data.json', 'r') as bulk_data:
-            content = bulk_data.read()
-            return JSONResponse(content=content, status_code=200)
-
-    except Exception as e:
-        raise HTTPException(detail=f"Error: {e}", status_code=400)
