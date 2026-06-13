@@ -7,17 +7,14 @@ RUN apt-get update && apt-get install -y \
     libmariadb-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
 # Set working directory
 WORKDIR /app
 
 # Copy dependency files first for better caching
-COPY pyproject.toml uv.lock* ./
+COPY requirements.txt .
 
 # Install dependencies using uv
-RUN uv sync --frozen --no-dev
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire backend directory
 COPY . .
@@ -29,4 +26,4 @@ ENV PYTHONPATH="/app:${PYTHONPATH}"
 EXPOSE 8181
 
 # Run the Python script directly (this will execute uvicorn.run())
-CMD ["uv", "run", "python", "main.py"]
+CMD ["python", "main.py"]

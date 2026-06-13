@@ -151,11 +151,11 @@ async def new_user(new_user_data: NewUser):
         new_user_insertion = user_collection.insert_one(new_user_data_dict)
 
         if new_user_insertion.acknowledged:
-            return JSONResponse(content=f"User {new_user_data_dict["name"]} Added Successfully!", status_code=201)
+            return JSONResponse(content=f'User {new_user_data_dict["name"]} Added Successfully!', status_code=203)
 
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"User {new_user_data_dict["name"]} not added!\nError: {e}")
+        raise HTTPException(status_code=400, detail=f'User {new_user_data_dict["name"]} not added!\nError: {e}')
 
 
 @auth_router.get("/all/users")
