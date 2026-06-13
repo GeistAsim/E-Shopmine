@@ -181,7 +181,14 @@ export const Home = () => {
                                     </div>
                                 </div>
                             )
-                            : null}
+                            : (
+                            <div className="financials">
+                                <div className="data-row due-row">
+                                    <span className="label">Due Amount</span>
+                                    <span className="value">₹{row.Due}</span>
+                                </div>
+                            </div>
+                            )}
                         </div>
                     </div>
                 ))}

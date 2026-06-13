@@ -46,6 +46,7 @@ def home_entity(item) -> dict:
         "Month": item["Month"],
         "Created_At": str(item["Created_At"]),
         "Application_ID": item["Application_ID"],
+        "Due": item["Due"]
     }
 
 
