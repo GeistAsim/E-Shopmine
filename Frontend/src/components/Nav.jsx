@@ -105,7 +105,7 @@ export const Nav = () => {
     const handlelogout = (e) => {
         e.preventDefault()
         window.localStorage.removeItem('token')
-        window.location.reload('/login')
+        window.location.replace('/login')
     }
     
 
