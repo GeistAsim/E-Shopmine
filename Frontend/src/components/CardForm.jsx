@@ -62,10 +62,6 @@ export const CardForm = () => {
     };
 
     if (notification.is_error) {
-        setTimeout(() => {
-            window.location.reload()
-        }, 5000);
-
         return <Notification />
     }
 

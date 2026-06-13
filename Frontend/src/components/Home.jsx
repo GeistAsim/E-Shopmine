@@ -113,10 +113,6 @@ export const Home = () => {
     }
 
     if (notification.is_error) {
-        setTimeout(() => {
-            window.location.reload()
-        }, 5000);
-
         return <Notification />
     }
 
@@ -131,10 +127,12 @@ export const Home = () => {
                             <div className="editBox">
                                 <h3 className="user-name">{row.Name}</h3>
                             </div>
-                            <div className='btn-holder'>
+                            {super_user ? (
+                                <div className='btn-holder'>
                                 <MdModeEdit size='25' onClick={() => (setoldData(row), handleRoute('edit'))} />
                                 <FaTrashAlt size='20' color='#ff4343' name='id' value={delete_log_ID} onClick={() => (setdelete_doc(true), setdelete_log_ID({ id: row.id }))} />
                             </div>
+                            ) : null}
                         </div>
 
                         {/* Card Body: All other details */}

@@ -8,7 +8,7 @@ import { ContainerContext } from '../Context/context';
 
 
 export const Nav = () => {
-    const { API_Connect, searchPara, setsearchPara, setsearchData, authorized, access_token } = useContext(ContainerContext)
+    const { API_Connect, searchPara, setsearchPara, setsearchData, authorized, access_token, super_user } = useContext(ContainerContext)
 
     const navigate = useNavigate();
     const url = useLocation();
@@ -105,7 +105,7 @@ export const Nav = () => {
     const handlelogout = (e) => {
         e.preventDefault()
         window.localStorage.removeItem('token')
-        window.location.reload('/')
+        window.location.reload('/login')
     }
     
 
@@ -120,9 +120,11 @@ export const Nav = () => {
                     <input type="text" className="search-area" name='query' placeholder='Search' value={searchPara.query} onChange={handleChange} />
                 </form>
                 <div className="btnholder">
-                    <div onClick={() => (handleRoute())} className='add'>
-                        <RiAddLargeLine />
-                    </div>
+                    {super_user ? (
+                         <div onClick={() => (handleRoute())} className='add'>
+                            <RiAddLargeLine />
+                        </div>
+                    ) : null}
                     <div onClick={handlelogout} className='add logout'>
                         <IoLogOutSharp />
                     </div>

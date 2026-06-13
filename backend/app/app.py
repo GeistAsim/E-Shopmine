@@ -78,6 +78,10 @@ async def get_logs(current_user: current_active_user):
 
 @app.post("/post", response_model=CreateLog)
 async def post_log(row: CreateLog, current_user: current_active_user):
+     # Only super user can do this
+    if not current_user.super:
+        raise HTTPException(status_code=405, detail="You are not allow for this operation!")
+
     # Make dict of row data
     new_doc_dict = row.model_dump()
     # Get date
@@ -93,15 +97,19 @@ async def post_log(row: CreateLog, current_user: current_active_user):
         # Insert New Doc
         collection_name.insert_one(new_doc_dict)
         return JSONResponse(content=f"Insertion Done Successfully!", status_code=201)
-
+    
     # Error in method execution
     except Exception as e:
-        return HTTPException(detail=f"Insertion Failed! With Status Code {e}", status_code=500)
+        raise HTTPException(detail=f"Insertion Failed! With Status Code {e}", status_code=500)
 
 
 
 @app.put("/post/update")
 async def update_log(row: UpdateLog, current_user: current_active_user):
+    # Only super user can do this
+    if not current_user.super:
+        raise HTTPException(status_code=405, detail="You are not allow for this operation!")
+
     # Make dict of row data
     updated_doc_dict = row.model_dump()
     # Get date
@@ -133,6 +141,10 @@ async def update_log(row: UpdateLog, current_user: current_active_user):
 
 @app.put("/post/UpdateDue")
 async def update_due(due_row: UpdateDue, current_user: current_active_user):
+    # Only super user can do this
+    if not current_user.super:
+        raise HTTPException(status_code=405, detail="You are not allow for this operation!")
+
     # Convert String to ObjectID for MongoDB compatibility
     document_id = ObjectId(due_row.id)
     try:
@@ -152,6 +164,7 @@ async def update_due(due_row: UpdateDue, current_user: current_active_user):
     # Error in method execution
     except Exception as e:
         raise HTTPException(detail=f"Couldn't able to update document due to: {e}", status_code=400)
+
 
 
 @app.get("/search/post/{query}")
@@ -181,6 +194,10 @@ async def search_row(query, current_user: current_active_user):
 
 @app.delete("/delete/post")
 async def delete_log(row: DocumentID, current_user: current_active_user):
+    # Only super user can do this
+    if not current_user.super:
+        raise HTTPException(status_code=405, detail="You are not allow for this operation!")
+
     # make dict of row data
     delete_doc_id = row.model_dump()
 
@@ -205,9 +222,14 @@ async def delete_log(row: DocumentID, current_user: current_active_user):
         raise HTTPException(status_code=400, detail=f"Error: {e}")
 
 
-# For delete all data
+# Delete all data
 @app.delete("/delete/all")
 async def delete_all_log(current_user: current_active_user):
+    # Only super user can do this
+    if not current_user.super:
+        raise HTTPException(status_code=405, detail="You are not allow for this operation!")
+
+
     try:
         delete_all = collection_name.delete_many({})
         if delete_all.acknowledged:

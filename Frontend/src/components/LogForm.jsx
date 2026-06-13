@@ -82,10 +82,6 @@ export const LogForm = () => {
     };
 
     if (notification.is_error) {
-        setTimeout(() => {
-            window.location.reload()
-        }, 5000);
-
         return <Notification />
     }
 
