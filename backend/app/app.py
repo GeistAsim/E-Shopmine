@@ -25,8 +25,9 @@ app.include_router(auth_router)
 # Current Active User Dependency for methods
 current_active_user = Annotated[User, Depends(get_current_active_user)]
 
+
 # check weather the user is super or not
-def is_super(current_user, doc_collection):
+def get_home_entitiys_by_user_role(current_user, doc_collection):
     if current_user.super:
         return super_home_entitys(doc_collection)
     
@@ -67,7 +68,7 @@ def user_session(current_user: current_active_user):
 async def get_logs(current_user: current_active_user):
     # fetch all rows
     docs = collection_name.find()
-    result = is_super(current_user, docs)
+    result = get_home_entitiys_by_user_role(current_user, docs)
 
     # if data not found
     if not result:
@@ -175,7 +176,7 @@ async def search_row(query, current_user: current_active_user):
 
         # fetch all documents
         data = collection_name.find()
-        rows = is_super(current_user, data)
+        rows = get_home_entitiys_by_user_role(current_user, data)
 
         # search titles
         searchTitles = ["Name", "Contact", "Application_ID", "Service", "Service_Type", "Month"]
