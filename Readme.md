@@ -1,5 +1,8 @@
 # E-Shopmine
-E-Shopmine is a privacy focus transcations manager system web app.
+E-Shopmine is a privacy focus transcations manager system web app. That allow their user's to monitor their CSE shop accounts easily.
+Give it a try:
+Username: dummy
+Password: dummy
 
 ## Project Structure
 ```bash
