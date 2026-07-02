@@ -54,7 +54,11 @@ app.add_middleware(
 )
 
 # DataBase Table Selection
-collection_name = conn.Shop.logs if int(os.getenv("SERVER_PORT")) == 8181 else conn.Shop.test
+def get_collection_name(user_data_collection):
+    db = conn['Shop']
+    collection = db[user_data_collection]
+    return collection
+
 
 # User Session
 @app.get("/user/session")
@@ -67,7 +71,7 @@ def user_session(current_user: current_active_user):
 @app.get("/home")
 async def get_logs(current_user: current_active_user):
     # fetch all rows
-    docs = collection_name.find()
+    docs = get_collection_name(current_user.data_collection).find()
     result = get_home_entitiys_by_user_role(current_user, docs)
 
     # if data not found
@@ -75,6 +79,7 @@ async def get_logs(current_user: current_active_user):
         raise HTTPException(status_code=404, detail="Data Not Found!")
 
     return JSONResponse(content=result[::-1], status_code=200)
+
 
 
 @app.post("/post", response_model=CreateLog)
@@ -93,10 +98,10 @@ async def post_log(row: CreateLog, current_user: current_active_user):
 
     try:
         # Count total no of documents
-        doc_count = collection_name.count_documents({})
+        doc_count = get_collection_name(current_user.data_collection).count_documents({})
 
         # Insert New Doc
-        collection_name.insert_one(new_doc_dict)
+        get_collection_name(current_user.data_collection).insert_one(new_doc_dict)
         return JSONResponse(content=f"Insertion Done Successfully!", status_code=201)
     
     # Error in method execution
@@ -123,11 +128,11 @@ async def update_log(row: UpdateLog, current_user: current_active_user):
 
     try:
         # Get Document from Database
-        get_targeted_doc = collection_name.find_one({"_id": document_id})
+        get_targeted_doc = get_collection_name(current_user.data_collection).find_one({"_id": document_id})
 
         # Update if Document is available
         if get_targeted_doc:
-            doc_update = collection_name.update_one({"_id": document_id}, {"$set": updated_doc_dict})
+            doc_update = get_collection_name(current_user.data_collection).update_one({"_id": document_id}, {"$set": updated_doc_dict})
             if doc_update.acknowledged:
                 return JSONResponse(content="Document Update Successfully", status_code=200)
         # if document not found
@@ -154,7 +159,7 @@ async def update_due(due_row: UpdateDue, current_user: current_active_user):
 
         # update data if document is available
         if get_targeted_doc:
-            doc_due_update = collection_name.update_one({"_id": document_id}, {"$set": {"Due": due_row.Due}})
+            doc_due_update = get_collection_name(current_user.data_collection).update_one({"_id": document_id}, {"$set": {"Due": due_row.Due}})
             # if update data successfully
             if doc_due_update.acknowledged:
                 return JSONResponse(content="Document Due Field Updated Successfully!", status_code=200)
@@ -175,7 +180,7 @@ async def search_row(query, current_user: current_active_user):
         search_engine = SimpleSearchIndex()
 
         # fetch all documents
-        data = collection_name.find()
+        data = get_collection_name(current_user.data_collection).find()
         rows = get_home_entitiys_by_user_role(current_user, data)
 
         # search titles
@@ -207,11 +212,11 @@ async def delete_log(row: DocumentID, current_user: current_active_user):
 
     try:
         # find document
-        find_document = collection_name.find_one({"_id": document_id})
+        find_document = get_collection_name(current_user.data_collection).find_one({"_id": document_id})
 
         # if document found delete it
         if find_document:
-            delete_document = collection_name.delete_one({"_id": document_id})
+            delete_document = get_collection_name(current_user.data_collection).delete_one({"_id": document_id})
             # if deletion is successful
             if delete_document.acknowledged:
                 return JSONResponse(content=f"Document deleted successfully!", status_code=200)
@@ -232,7 +237,7 @@ async def delete_all_log(current_user: current_active_user):
 
 
     try:
-        delete_all = collection_name.delete_many({})
+        delete_all = get_collection_name(current_user.data_collection).delete_many({})
         if delete_all.acknowledged:
             return JSONResponse(content="All documents deleted successfully")
     except Exception as e:

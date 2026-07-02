@@ -8,7 +8,8 @@ def all_users_entity(item) -> dict:
         "email": str(item["email"]),
         "disabled": str(item["disabled"]),
         "super": str(item["super"]),
-        "created_at": str(item["created_at"])
+        "created_at": str(item["created_at"]),
+        "data_collection": str(item["data_collection"])
     }
 
 def all_users_entitys(items) -> list:

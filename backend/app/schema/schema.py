@@ -27,6 +27,7 @@ class User(BaseModel):
     email: str | None = None
     disabled: bool | None = None
     super: bool | None = None
+    data_collection: str
 
 # Login request model
 class LoginRequest(BaseModel):
