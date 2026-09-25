@@ -38,6 +38,13 @@ class User(BaseModel):
     data_collection: str
     #admin: bool | None = None
 
+
+# Store Requested User with password
+class UserInDB(User):
+    hashed_password: str
+    admin: bool | None = None
+
+
 # Login request model
 class LoginRequest(BaseModel):
     username: str
