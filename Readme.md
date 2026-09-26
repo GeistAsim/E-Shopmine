@@ -22,9 +22,10 @@ E-Shopmine
 │   │   ├── model
 │   │   │   ├── __init__.py
 │   │   │   └── model.py
-│   │   └── schema
-│   │       ├── __init__.py
-│   │       └── schema.py
+│   │   ├── schema
+│   │   │   ├── __init__.py
+│   │   │   └── schema.py
+│   │   └── user.py
 │   ├── docker-compose.yml
 │   ├── Dockerfile
 │   ├── __init__.py
