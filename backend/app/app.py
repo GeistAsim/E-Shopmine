@@ -8,7 +8,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from app.databases.crud import Crud 
 from app.schema.schema import CreateLog, UpdateLog, UpdateDue, DocumentID, User
-from app.auth import auth_router, get_current_active_user
+from app.user import auth_router, get_current_active_user
 from app.func.func import Func
 
 load_dotenv()
