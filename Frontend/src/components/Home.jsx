@@ -9,7 +9,7 @@ import { Notification } from './Notification';
 
 export const Home = () => {
 
-    const { API_Connect, setoldData, searchData, setsearchData, authorized, access_token, setAuthorized, notification, setNotification, super_user, summary_data, setsummary_data } = useContext(ContainerContext)
+    const { API_Connect, setoldData, searchData, setsearchData, authorized, access_token, setAuthorized, notification, setNotification, super_user, summary_data, setsummary_data, setLoading } = useContext(ContainerContext)
 
     const url = useLocation();
     const navigate = useNavigate();
@@ -35,8 +35,9 @@ export const Home = () => {
 
 
     useEffect(() => {
-        const api_connect = async () => {
+        const get_data = async () => {
             try {
+                setLoading(true);
                 let res = await fetch(`${API_Connect}/home`, {
                     method: 'GET',
                     headers: {
@@ -51,28 +52,28 @@ export const Home = () => {
                         "is_error": true,
                         "status_code": res.status,
                         "message": res.statusText
-                    })
-                    //navigate('/login')
-                    //localstorage.remove('token')
+                    }) 
                 }
 
                 let HomeData = await res.json();
-                //setAuthorized(true);
                 setHomeData(HomeData);
             }
             catch (err) {
                 console.error(`Error Occure in Backend Connection ${err}`)
             }
+            finally {
+                setLoading(false)
+            }
         }
 
-        api_connect();
-
+        get_data();
 
     }, [])
 
 
     const delete_log = async () => {
         try {
+            setLoading(true);
             let res = await fetch(`${API_Connect}/delete/post`, {
                 method: "DELETE",
                 headers: {
@@ -114,6 +115,7 @@ export const Home = () => {
         finally {
             setdelete_doc(false)
             setdelete_log_ID({ id: "" })
+            setLoading(false);
         }
     };
 

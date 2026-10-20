@@ -6,7 +6,7 @@ import logo from '../assets/logo.png'
 
 export const Login = () => {
 
-    const { API_Connect, setAuthorized } = useContext(ContainerContext)
+    const { API_Connect, setAuthorized, setLoading } = useContext(ContainerContext)
 
     const { handleSubmit, formState: { isSubmitting } } = useForm();
 
@@ -43,6 +43,7 @@ export const Login = () => {
     let handle_login = async (credentials) => {
 
         try {
+            setLoading(true);
             const res = await fetch(`${API_Connect}/token`, {
                 method: 'POST',
                 headers: {
@@ -74,6 +75,9 @@ export const Login = () => {
         catch (err) {
             console.error(`${err}`);
             setLoginError('An error occurred during login. Please try again.');
+        }
+        finally {
+            setLoading(false)
         }
 
     }

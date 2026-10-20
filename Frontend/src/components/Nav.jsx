@@ -12,7 +12,7 @@ import { BsSearch } from "react-icons/bs";
 
 
 export const Nav = () => {
-    const { API_Connect, searchPara, setsearchPara, setsearchData, authorized, access_token, super_user, setsummary_data, notification, setNotification } = useContext(ContainerContext)
+    const { API_Connect, searchPara, setsearchPara, setsearchData, authorized, access_token, super_user, setsummary_data, notification, setNotification, setLoading } = useContext(ContainerContext)
 
 
     const [side_panel, setside_panel] = useState(false);
@@ -57,6 +57,7 @@ export const Nav = () => {
 
     const handle_user_role = async () => {
         try {
+            setLoading(true);
             const res = await fetch(`${API_Connect}/switch/user/role`, {
                 method: "GET",
                 headers: {
@@ -90,6 +91,9 @@ export const Nav = () => {
                 "message": err.message || "Failed to switch user role"
             }));
         }
+        finally {
+            setLoading(false);
+        }
     }
 
 
@@ -111,6 +115,7 @@ export const Nav = () => {
     const handleSummary = async () => {
 
         try {
+            setLoading(true);
             let res = await fetch(`${API_Connect}/finance/summary`, {
                 method: "GET",
                 headers: {
@@ -134,6 +139,9 @@ export const Nav = () => {
                 "message": err.message || "Failed to fetch finance summary"
             }));
         }
+        finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -141,6 +149,7 @@ export const Nav = () => {
         const directSearch = async () => {
             // API call
             try {
+                setLoading(true);
                 const res = await fetch(`${API_Connect}/search/post/${searchTerm.at(-1)}`, {
                     method: "GET",
                     headers: {
@@ -197,6 +206,9 @@ export const Nav = () => {
                     "status_code": "Error",
                     "message": err.message || "An error occurred while searching"
                 }));
+            }
+            finally {
+                setLoading(false)
             }
         }
 

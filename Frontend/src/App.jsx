@@ -4,6 +4,7 @@ import { Nav } from './components/Nav'
 import { Home } from './components/Home'
 import { Notification } from './components/Notification'
 import { LogForm } from './components/LogForm'
+import { Loading } from './components/Loading'
 import { ContainerContext } from './Context/context'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 
@@ -25,7 +26,7 @@ function App() {
   }
   
   const [authorized, setAuthorized] = useState(false)
-  const [loading, setLoading] = useState(!!access_token)
+  const [loading, setLoading] = useState(true)
   const [super_user, setsuper_user] = useState(false)
   const [summary_data, setsummary_data] = useState([])
 
@@ -42,7 +43,7 @@ function App() {
 
     let refreshToken = async () => {
       try {
-
+        setLoading(true);
         let res = await fetch(`${API_Connect}/refresh/token`, {
           method: "GET",
           headers: {
@@ -77,7 +78,10 @@ function App() {
         if (err.name !== "TypeError" && err.name !== "AbortError") {
           localStorage.removeItem('token')
           navigate('/login')
-        }
+        } 
+      }
+      finally {
+        setLoading(false);
       }
     }
 
@@ -85,7 +89,7 @@ function App() {
     const verifySession = async () => {
       if (!access_token) {
         setAuthorized(false);
-        setLoading(false);
+        // setLoading(false);
         if (window.location.pathname !== '/login') {
           navigate("/login");
         }
@@ -153,6 +157,10 @@ function App() {
 
     verifySession();
 
+    if (access_token === null || access_token === "") {
+      setLoading(false)
+    }
+
   }, [])
 
 
@@ -162,15 +170,7 @@ function App() {
   const [searchPara, setsearchPara] = useState({
     query: ''
   })
-  const [searchData, setsearchData] = useState([]) 
-
-  if (loading) {
-    return (
-      <div className="app-loader">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
+  const [searchData, setsearchData] = useState([])
 
   return (
     <>
@@ -191,11 +191,19 @@ function App() {
             setNotification,
             super_user,
             summary_data,
-            setsummary_data
+            setsummary_data,
+            setLoading
           }
         }>
 
         <div className={`container`}>
+
+          {loading && (
+            <div className="loaderbox">
+              <div className="loader"></div>
+            </div>
+          )}
+
           {window.location.pathname === "/login" ? null : (
             <Nav />
           )}

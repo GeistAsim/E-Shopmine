@@ -8,7 +8,7 @@ import { Notification } from './Notification';
 
 export const LogForm = () => {
 
-    const { API_Connect, access_token, oldData, setoldData, notification, setNotification } = useContext(ContainerContext);
+    const { API_Connect, access_token, oldData, setoldData, notification, setNotification, setLoading } = useContext(ContainerContext);
 
     const { handleSubmit, formState: { isSubmitting } } = useForm();
 
@@ -61,6 +61,7 @@ export const LogForm = () => {
         delete formData.Total_Amount
         // API call here
         try {
+            setLoading(true);
             // POST data
             const res = await fetch(`${API_Connect}/post`, {
                 method: "POST",
@@ -100,6 +101,9 @@ export const LogForm = () => {
         catch (err) {
             console.error(`Error Occure in Posting Form with error code ${err}`)
         }
+        finally {
+            setLoading(false);
+        }
 
     }
 
@@ -108,6 +112,7 @@ export const LogForm = () => {
         delete formData.Total_Amount
 
         try {
+            setLoading(true);
             // post data 
             let res = await fetch(`${API_Connect}/post/update`, {
                 method: "PUT",
@@ -147,6 +152,9 @@ export const LogForm = () => {
         }
         catch (err) {
             console.error(`Error in Updating error: ${err}`)
+        }
+        finally {
+            setLoading(false)
         }
  
     }
