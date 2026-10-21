@@ -2,6 +2,7 @@ from bson import ObjectId
 import re
 from app.databases.mongo import conn
 from app.model.model import super_home_entitys, home_entitys
+import pandas as pd
 
 class Crud:
     def __init__(self, user, data_cluster):
@@ -144,3 +145,14 @@ class Crud:
         # Map results
         rows = self.get_home_entitys_by_user_role(data)
         return rows
+
+    def extraction(self):
+        cdata = self.get_collection_name().find()
+        xdata = super_home_entitys(cdata)
+        data = []
+        for i in xdata:
+            new_dict = i.pop("id", None)
+            data.append(i)
+        df = pd.DataFrame(data)
+        df.to_csv('extracted.csv', index=False)
+        return "extracted.csv"

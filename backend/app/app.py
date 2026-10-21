@@ -10,6 +10,7 @@ from app.databases.crud import Crud
 from app.schema.schema import CreateLog, UpdateLog, UpdateDue, DocumentID, User
 from app.user import auth_router, get_current_active_user
 from app.func.func import Func
+from app.extraction import data_extraction_router
 
 load_dotenv()
 
@@ -20,6 +21,7 @@ global_connect = os.getenv("global_connect")
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(data_extraction_router)
 
 # Current Active User Dependency for methods
 current_active_user = Annotated[User, Depends(get_current_active_user)]
