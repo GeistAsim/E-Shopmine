@@ -76,7 +76,7 @@ export const Nav = () => {
                 sessionStorage.setItem('token', new_role.token)
 
             } else if (!new_role.admin) {
-                //sessionStorage.removeItem('token')
+                sessionStorage.removeItem('token')
                 localStorage.setItem('token', new_role.token)
             }
             window.location.reload();

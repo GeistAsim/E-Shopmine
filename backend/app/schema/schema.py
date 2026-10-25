@@ -15,7 +15,7 @@ class TokenData(BaseModel):
 
 class RefreshTokenData(BaseModel):
     username: str | None = None
-    admin: bool
+    admin: bool = False
     token: str | None = None
 
 # New user data modal

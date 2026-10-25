@@ -36,6 +36,10 @@ export const Home = () => {
 
     useEffect(() => {
         const get_data = async () => {
+            if (!authorized || !access_token || access_token === "undefined") {
+                return;
+            }
+
             try {
                 setLoading(true);
                 let res = await fetch(`${API_Connect}/home`, {
@@ -45,18 +49,21 @@ export const Home = () => {
                         'Content-Type': 'application/json'
                     }
                 });
-                if (!res.ok || res.status === 401) {
+                if (!res.ok) {
                     console.error("Unable to connect HomeDataBase!");
                     setNotification({
                         ...notification,
                         "is_error": true,
                         "status_code": res.status,
-                        "message": res.statusText
-                    }) 
+                        "message": res.statusText || "Unable to fetch data"
+                    });
+                    return;
                 }
 
                 let HomeData = await res.json();
-                setHomeData(HomeData);
+                if (Array.isArray(HomeData)) {
+                    setHomeData(HomeData);
+                }
             }
             catch (err) {
                 console.error(`Error Occure in Backend Connection ${err}`)
@@ -68,7 +75,7 @@ export const Home = () => {
 
         get_data();
 
-    }, [])
+    }, [authorized, access_token])
 
 
     const delete_log = async () => {

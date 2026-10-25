@@ -5,7 +5,7 @@ import os
 from fastapi import Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from pwdlib import PasswordHash
 from dotenv import load_dotenv
 from app.model.model import all_users_entitys
@@ -187,15 +187,15 @@ class UserAuth:
         try:
             payload = jwt.decode(token, self.__SECRET_KEY, algorithms=[self._ALGORITHM], options={"verify_exp": False})
             username = payload.get("sub")
-            admin = payload.get("admin")
+            admin = payload.get("admin", False)
             expiration_time = payload.get("exp")
 
-            if expiration_time < current_time_stamp and expiration_time:
-                token_data = RefreshTokenData(username=username, admin=admin)
+            if expiration_time and expiration_time < current_time_stamp:
+                token_data = RefreshTokenData(username=username, admin=bool(admin))
                 return token_data
 
             else:
-                previous_token = RefreshTokenData(token=token, admin=admin)
+                previous_token = RefreshTokenData(token=token, admin=bool(admin))
                 return previous_token
 
         except InvalidTokenError as e:
@@ -233,7 +233,7 @@ class UserAuth:
             token_data = TokenData(username=username, admin=admin)
 
         except InvalidTokenError as e:
-            if str(e) == "Signature has expired":
+            if isinstance(e, ExpiredSignatureError) or str(e) == "Signature has expired":
                 #decode_token(token)
                 raise HTTPException(status_code=400, detail="Token has expired!!!")
 

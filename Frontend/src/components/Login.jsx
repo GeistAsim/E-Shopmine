@@ -64,6 +64,7 @@ export const Login = () => {
                     sessionStorage.setItem('token', data.access_token)
 
                 } else if (!data.admin) {
+                    sessionStorage.removeItem('token');
                     localStorage.setItem('token', data.access_token)
                 }
                 window.location.replace('/');

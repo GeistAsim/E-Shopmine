@@ -12,23 +12,22 @@ import { Routes, Route, useNavigate } from 'react-router-dom'
 function App() {
 
   const API_Connect = import.meta.env.VITE_API;
-  let access_token = ""
+  const getStoredToken = () => {
+    const admin_state = localStorage.getItem('admin');
+    const admin_token = sessionStorage.getItem('token');
+    const normal_token = localStorage.getItem('token');
 
-  const admin_token = sessionStorage.getItem('token')
-  const normal_token = localStorage.getItem('token')
+    if (admin_token !== null && admin_token !== "undefined" && admin_state === "true") {
+      return admin_token;
+    }
+    return normal_token || "";
+  };
 
-  const admin_state = localStorage.getItem('admin')
-  
-  if (admin_token !== null && admin_state === "true") {
-    access_token = admin_token
-  } else {
-    access_token = normal_token
-  }
-  
-  const [authorized, setAuthorized] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [super_user, setsuper_user] = useState(false)
-  const [summary_data, setsummary_data] = useState([])
+  const [access_token, setAccessToken] = useState(() => getStoredToken());
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [super_user, setsuper_user] = useState(false);
+  const [summary_data, setsummary_data] = useState([]);
 
   const navigate = useNavigate();
 
@@ -37,59 +36,68 @@ function App() {
     "is_error": false,
     "status_code": "",
     "message": ""
-  }) 
+  });
+
+  const saveToken = (newToken, isAdmin) => {
+    localStorage.setItem('admin', isAdmin ? "true" : "false");
+    if (isAdmin) {
+      sessionStorage.setItem('token', newToken);
+    } else {
+      sessionStorage.removeItem('token');
+      localStorage.setItem('token', newToken);
+    }
+    setAccessToken(newToken);
+  };
+
+  const clearAuthData = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin');
+    sessionStorage.removeItem('token');
+    setAccessToken("");
+    setAuthorized(false);
+    setsuper_user(false);
+  };
 
   useEffect(() => {
 
-    let refreshToken = async () => {
+    const refreshToken = async (expiredToken) => {
+      const tokenToUse = expiredToken || access_token || getStoredToken();
+      if (!tokenToUse || tokenToUse === "undefined") {
+        return null;
+      }
+
       try {
         setLoading(true);
-        let res = await fetch(`${API_Connect}/refresh/token`, {
+        const res = await fetch(`${API_Connect}/refresh/token`, {
           method: "GET",
           headers: {
-            "Authorization": `Bearer ${access_token}`,
+            "Authorization": `Bearer ${tokenToUse}`,
             "Content-Type": "application/json"
           }
         });
 
-        //let res_data = await res.json();
-        
         if (res.status === 201) {
-          let res_data = await res.json();
-          localStorage.setItem('admin', res_data.admin)
-          if (res_data.admin) {
-            sessionStorage.setItem('token', res.access_token)
-          }
-          else if (!res_data.admin) {
-            localStorage.setItem('token', res_data.access_token)
-          }
-          //window.location.reload();
-          setAuthorized(true)
-          return "Token Refreshed!!!"
+          const res_data = await res.json();
+          const newToken = res_data.access_token;
+          const isAdmin = Boolean(res_data.admin);
+          saveToken(newToken, isAdmin);
+          return { token: newToken, admin: isAdmin };
+        } else if (res.ok) {
+          const isAdmin = localStorage.getItem('admin') === "true";
+          return { token: tokenToUse, admin: isAdmin };
         }
- 
-        else if (res.ok) {
-          window.location.reload();
-          setAuthorized(true)
-        }
-
+        return null;
       } catch (err) {
-        console.error(`Error Occure: ${err}`)
-        if (err.name !== "TypeError" && err.name !== "AbortError") {
-          localStorage.removeItem('token')
-          navigate('/login')
-        } 
+        console.error(`Error Occurred during token refresh: ${err}`);
+        return null;
       }
-      finally {
-        setLoading(false);
-      }
-    }
+    };
 
-
-    const verifySession = async () => {
-      if (!access_token) {
+    const verifySession = async (tokenToCheck) => {
+      const currentToken = tokenToCheck || access_token || getStoredToken();
+      if (!currentToken || currentToken === "undefined") {
         setAuthorized(false);
-        // setLoading(false);
+        setLoading(false);
         if (window.location.pathname !== '/login') {
           navigate("/login");
         }
@@ -97,10 +105,11 @@ function App() {
       }
 
       try {
+        setLoading(true);
         const res = await fetch(`${API_Connect}/user/session`, {
           method: "GET",
           headers: {
-            'Authorization': `Bearer ${access_token}`,
+            'Authorization': `Bearer ${currentToken}`,
             'Content-Type': 'application/json'
           }
         });
@@ -110,45 +119,50 @@ function App() {
 
           if (session_res.active_user === true) {
             setAuthorized(true);
-          
+            setAccessToken(currentToken);
+
+            if (session_res.super === true) {
+              setsuper_user(true);
+              localStorage.setItem('admin', "true");
+            } else {
+              setsuper_user(false);
+              localStorage.setItem('admin', "false");
+            }
+
             if (window.location.pathname === '/login') {
               navigate("/");
             }
           } else {
-            setAuthorized(false);
-            localStorage.removeItem('token');
+            clearAuthData();
             navigate('/login');
           }
 
-          if (session_res.super === true) {
-            setsuper_user(true)
-          } else {
-            localStorage.setItem('admin', session_res.super)
-            setsuper_user(false)
-          }
- 
         } else {
-          const session_res = await res.json();
+          const session_res = await res.json().catch(() => ({}));
 
           if (session_res.detail === "Token has expired!!!") {
-            await refreshToken();
-          }
-
-          else {
-            setAuthorized(false);
-            localStorage.removeItem('token');
+            const refreshRes = await refreshToken(currentToken);
+            if (refreshRes && refreshRes.token) {
+              // Re-verify the session with the new token to confirm active user and super user status
+              await verifySession(refreshRes.token);
+              return;
+            } else {
+              clearAuthData();
+              navigate('/login');
+            }
+          } else {
+            clearAuthData();
             navigate('/login');
           }
         }
 
-
       } catch (err) {
         console.error("Session verification failed:", err);
-          setAuthorized(false);
-          if (err.name !== "TypeError" && err.name !== "AbortError") {
-            localStorage.removeItem('token')
-            navigate('/login')
-          }
+        setAuthorized(false);
+        if (err.name !== "TypeError" && err.name !== "AbortError") {
+          clearAuthData();
+          navigate('/login');
+        }
 
       } finally {
         setLoading(false);
@@ -156,10 +170,6 @@ function App() {
     };
 
     verifySession();
-
-    if (access_token === null || access_token === "") {
-      setLoading(false)
-    }
 
   }, [])
 
