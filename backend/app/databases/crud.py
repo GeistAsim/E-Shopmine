@@ -55,7 +55,7 @@ class Crud:
         """
         Return all the posts store in the database collection
         """ 
-        docs = self.get_collection_name().find().sort({ "id": -1 }).limit(50)
+        docs = self.get_collection_name().find().sort({ "_id": -1 }).limit(50)
         result = self.get_home_entitys_by_user_role(docs)
         return result
 
