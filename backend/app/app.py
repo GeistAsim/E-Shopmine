@@ -63,7 +63,7 @@ def get_logs(current_user: current_active_user):
     if not result:
         raise HTTPException(status_code=404, detail="Data Not Found!")
 
-    return JSONResponse(content=result[::-1], status_code=200)
+    return JSONResponse(content=result, status_code=200)
 
 
 
@@ -79,12 +79,7 @@ async def post_log(row: CreateLog, current_user: current_active_user):
     # Get date
     doc_date = str(datetime.date.today()) if row.Created_At.title() == 'Default' else row.Created_At
     # update date value
-    new_doc_dict["Created_At"] = doc_date
-
-    #set month by default
-    current_date = datetime.date.today()
-    current_month = current_date.strftime("%b%y")
-    new_doc_dict["Month"] = current_month 
+    new_doc_dict["Created_At"] = doc_date 
 
     # calculate total amount
     total_amount = new_doc_dict["Govt_Fee"] + new_doc_dict["Service_Charge"]

@@ -1,5 +1,6 @@
 from bson import ObjectId
 import re
+import datetime
 from app.databases.mongo import conn
 from app.model.model import super_home_entitys, home_entitys
 import pandas as pd
@@ -38,12 +39,23 @@ class Crud:
 
         return None
 
+
+    def get_month(self, new_date=None) -> str:
+        #set month by default
+        current_date = datetime.date.today() 
+
+        if new_date is not None:
+            current_date = datetime.datetime.strptime(new_date, "%Y-%m-%d").date()
+
+        current_month = current_date.strftime("%b%y")
+        return current_month
+
    
     def all_posts(self):
         """
         Return all the posts store in the database collection
-        """
-        docs = self.get_collection_name().find()
+        """ 
+        docs = self.get_collection_name().find().sort({ "id": -1 }).limit(50)
         result = self.get_home_entitys_by_user_role(docs)
         return result
 
@@ -74,6 +86,8 @@ class Crud:
         Parameter:
             post_data: Dict of new post data
         """
+        post_data["Month"] = self.get_month()
+
         post = self.get_collection_name().insert_one(post_data)
         return post
 
@@ -86,6 +100,8 @@ class Crud:
         """
         has_post = self.single_post(updated_data["id"])
         if has_post is not None:
+            print(updated_data["Created_At"])
+            updated_data["Month"] = self.get_month(new_date=updated_data["Created_At"])
             post_objectID = self.post_unique_id(updated_data["id"])
             post = self.get_collection_name().update_one({"_id": post_objectID}, {"$set": updated_data})
             return post
