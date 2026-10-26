@@ -66,7 +66,6 @@ def get_logs(current_user: current_active_user):
     return JSONResponse(content=result, status_code=200)
 
 
-
 @app.post("/post", response_model=CreateLog)
 async def post_log(row: CreateLog, current_user: current_active_user):
      # Only super user can do this

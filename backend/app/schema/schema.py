@@ -31,6 +31,7 @@ class NewUser(BaseModel):
 
 # User model
 class User(BaseModel):
+    user_id: str
     username: str
     email: str | None = None
     disabled: bool | None = None

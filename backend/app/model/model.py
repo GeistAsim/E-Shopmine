@@ -20,6 +20,7 @@ def all_users_entitys(items) -> list:
 def super_home_entity(item) -> dict:
     return {
         "id": str(item["_id"]),
+        "user_id": str(item["user_id"]),
         "Name": item["Name"],
         "Contact": item["Contact"],
         "Service": item["Service"],
@@ -40,6 +41,7 @@ def super_home_entitys(items) -> list:
 def home_entity(item) -> dict:
     return {
         "id": str(item["_id"]),
+        "user_id": str(item["user_id"]),
         "Name": item["Name"],
         "Contact": item["Contact"],
         "Service": item["Service"],

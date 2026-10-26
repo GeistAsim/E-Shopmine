@@ -110,6 +110,7 @@ export const LogForm = () => {
     async function update_post() {
          //e.preventDefault();
         delete formData.Total_Amount
+        delete formData.user_id
 
         try {
             setLoading(true);

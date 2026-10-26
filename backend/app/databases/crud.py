@@ -55,7 +55,7 @@ class Crud:
         """
         Return all the posts store in the database collection
         """ 
-        docs = self.get_collection_name().find().sort({ "_id": -1 }).limit(50)
+        docs = self.get_collection_name().find({"user_id": self.user.user_id}).sort({ "_id": -1 }).limit(50)
         result = self.get_home_entitys_by_user_role(docs)
         return result
 
@@ -76,7 +76,7 @@ class Crud:
             post_id: Post simple ID string
         """
         post_objectID = self.post_unique_id(post_id)
-        post = self.get_collection_name().find_one({"_id": post_objectID})
+        post = self.get_collection_name().find_one({"user_id": self.user.user_id, "_id": post_objectID})
         return post
 
 
@@ -87,6 +87,7 @@ class Crud:
             post_data: Dict of new post data
         """
         post_data["Month"] = self.get_month()
+        post_data["user_id"] = self.user.user_id
 
         post = self.get_collection_name().insert_one(post_data)
         return post
@@ -118,7 +119,7 @@ class Crud:
         has_post = self.single_post(post_id)
         if has_post is not None:
             post_objectID = self.post_unique_id(post_id)
-            delete_post = self.get_collection_name().delete_one({"_id": post_objectID})
+            delete_post = self.get_collection_name().delete_one({"user_id": self.user.user_id, "_id": post_objectID})
             return delete_post
         else:
             return False
@@ -156,7 +157,7 @@ class Crud:
             or_conditions.append({field: {"$regex": escaped_query, "$options": "i"}})
             
         # Query MongoDB
-        data = self.get_collection_name().find({"$or": or_conditions})
+        data = self.get_collection_name().find({"user_id": self.user.user_id, "$or": or_conditions})
         
         # Map results
         rows = self.get_home_entitys_by_user_role(data)
@@ -172,3 +173,23 @@ class Crud:
         df = pd.DataFrame(data)
         df.to_csv('extracted.csv', index=False)
         return "extracted.csv"
+
+
+    def _add_new_key(self, key, value):
+        """
+        If want to add new key and value in documents in entire database collection.
+        Parameter:
+            key: Value Label
+            value: value want to set default
+
+        Note: Work only with all_posts function of this class.
+        """
+        try:
+            db = self.get_collection_name().update_many(
+                {},
+                {"$set": {key: value}}
+            )
+            print(db)
+            return db
+        except:
+            return False
