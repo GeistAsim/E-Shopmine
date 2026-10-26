@@ -58,7 +58,7 @@ def user_session(current_user: current_active_user):
 def get_logs(current_user: current_active_user):
     # CRUD operations instance
     CRUD = Crud(user=current_user, data_cluster=data_cluster)
-    result = CRUD.all_posts()
+    result = CRUD.user_all_logs()
 
     if not result:
         raise HTTPException(status_code=404, detail="Data Not Found!")

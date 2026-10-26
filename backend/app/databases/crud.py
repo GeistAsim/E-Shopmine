@@ -1,3 +1,4 @@
+import os
 from bson import ObjectId
 import re
 import datetime
@@ -21,7 +22,8 @@ class Crud:
         Return the Collection Name for the Current User.
         """
         db = conn[self.data_cluster]
-        collection = db[self.user.data_collection]
+        # collection = db[self.user.data_collection]
+        collection = db["records"]
         return collection
 
 
@@ -51,7 +53,7 @@ class Crud:
         return current_month
 
    
-    def all_posts(self):
+    def user_all_logs(self):
         """
         Return all the posts store in the database collection
         """ 
@@ -101,10 +103,9 @@ class Crud:
         """
         has_post = self.single_post(updated_data["id"])
         if has_post is not None:
-            print(updated_data["Created_At"])
             updated_data["Month"] = self.get_month(new_date=updated_data["Created_At"])
             post_objectID = self.post_unique_id(updated_data["id"])
-            post = self.get_collection_name().update_one({"_id": post_objectID}, {"$set": updated_data})
+            post = self.get_collection_name().update_one({"user_id": self.user.user_id, "_id": post_objectID}, {"$set": updated_data})
             return post
         else:
             return False
@@ -122,15 +123,7 @@ class Crud:
             delete_post = self.get_collection_name().delete_one({"user_id": self.user.user_id, "_id": post_objectID})
             return delete_post
         else:
-            return False
-    
-
-    def delete_all_post(self):
-        """
-        Delete all pots of collection
-        """
-        delete_all = self.get_collection_name().delete_many({})
-        return delete_all
+            return False 
 
 
     def search_posts(self, query):
@@ -163,7 +156,13 @@ class Crud:
         rows = self.get_home_entitys_by_user_role(data)
         return rows
 
+
+    """ Bulk data manipulation operation section """
+
     def extraction(self):
+        """
+        Extract all data in csv file
+        """
         cdata = self.get_collection_name().find()
         xdata = super_home_entitys(cdata)
         data = []
@@ -175,7 +174,32 @@ class Crud:
         return "extracted.csv"
 
 
-    def _add_new_key(self, key, value):
+    def import_csv(self, filename):
+        """
+        Add data from a csv file.
+        """
+        file_path = os.path.abspath(filename)
+        df = pd.read_csv(file_path, dtype={'Application_ID': str}, keep_default_na=False)
+        data_dict_list = df.to_dict(orient="records")
+        # for d in data_dict_list:
+        #     print(type(d["Application_ID"]))
+        db = self.get_collection_name().insert_many(data_dict_list)
+
+
+    def __delete_user_records(self):
+        db = self.get_collection_name().delete_many({"user_id": self.user.user_id})
+        return db
+
+
+    def __delete_all_post(self):
+        """
+        Delete all pots of collection
+        """
+        delete_all = self.get_collection_name().delete_many({})
+        return delete_all
+
+
+    def __add_new_key(self, key, value):
         """
         If want to add new key and value in documents in entire database collection.
         Parameter:
