@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from typing import Annotated
-from datetime import timedelta
+from datetime import timedelta, date
 from fastapi import Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm 
@@ -67,7 +67,7 @@ async def switch_user_role(switch_to_admin_user: Annotated[User, Depends(user_au
 # Post new User
 @auth_router.post('/new/user')
 async def new_user(new_user_data: NewUser):
-    if new_user_data.username in self.user_manager():
+    if new_user_data.username in user_auth_core.user_manager():
         raise HTTPException(status_code=409, detail="Pick Another Username")
 
     # make dict of row data
@@ -82,13 +82,13 @@ async def new_user(new_user_data: NewUser):
 
     try:
         # Making Hashed Password
-        hashed_password = password_hashing(new_user_data.hashed_password)
+        hashed_password = user_auth_core.password_hashing(new_user_data.hashed_password)
 
         # change str password to hash password
         new_user_data_dict["hashed_password"] = hashed_password
 
         # insert new user
-        new_user_insertion = user_collection.insert_one(new_user_data_dict)
+        new_user_insertion = user_auth_core.user_collection.insert_one(new_user_data_dict)
 
         if new_user_insertion.acknowledged:
             return JSONResponse(content=f'User {new_user_data_dict["name"]} Added Successfully!', status_code=201)

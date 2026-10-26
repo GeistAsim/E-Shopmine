@@ -12,10 +12,6 @@ from app.model.model import all_users_entitys
 from app.schema.schema import Token, TokenData, User, UserInDB, NewUser, LoginRequest, RefreshTokenData
 from app.databases.mongo import conn
 
-# DataBase Table Selection
-# user_table = 'users' if int(os.getenv("SERVER_PORT")) == 8181 else 'test_user'
-user_collection = conn.Shop.users
-
 
 # Load Secrets
 load_dotenv()
@@ -35,6 +31,7 @@ class UserAuth:
         self.__SECRET_KEY = SECRET_KEY
         self._ALGORITHM = ALGORITHM
         self.ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
+        self.user_collection = conn.Shop.users
 
         # Hashed Password Instance
         self.password_hashed = PasswordHash.recommended()
@@ -59,7 +56,7 @@ class UserAuth:
         try:
             if username is not None:
                 # find requested user
-                user = user_collection.find({"username": username})
+                user = self.user_collection.find({"username": username})
                 
                 # User dict
                 user_dict = all_users_entitys(user)
@@ -74,7 +71,7 @@ class UserAuth:
 
             elif username is None:
                 # get all users
-                users_list = user_collection.find({})
+                users_list = self.user_collection.find({})
 
                 # list of all users
                 All_Users = all_users_entitys(users_list)
@@ -173,7 +170,7 @@ class UserAuth:
                 )
                 return JSONResponse(content={"admin": False, "token": new_token}, status_code=201)
 
-            elif not has_admin(user):
+            elif not self.has_admin(user):
                 raise HTTPException(status_code=403, detail="You are not Allow as Admin!!!") 
 
         except InvalidTokenError as e:
