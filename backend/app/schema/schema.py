@@ -36,7 +36,6 @@ class User(BaseModel):
     email: str | None = None
     disabled: bool | None = None
     super: bool | None = None
-    data_collection: str
     #admin: bool | None = None
 
 

@@ -76,9 +76,6 @@ async def new_user(new_user_data: NewUser):
     # add current date
     new_user_data_dict["created_at"] = str(date.today())
 
-    # New user data collection name
-    new_user_data_dict["data_collection"] = new_user_data_dict["username"]
-    
     # set disabled and super
     new_user_data_dict["disabled"] = True
     new_user_data_dict["super"] = False

@@ -244,4 +244,4 @@ class UserAuth:
         if user is None:
             raise self.credentials_exception
 
-        return user
+        return user 

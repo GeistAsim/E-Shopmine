@@ -15,6 +15,7 @@ class Crud:
         """
         self.user = user
         self.data_cluster = data_cluster
+        self.__collection = "records"
 
 
     def get_collection_name(self):
@@ -22,8 +23,7 @@ class Crud:
         Return the Collection Name for the Current User.
         """
         db = conn[self.data_cluster]
-        # collection = db[self.user.data_collection]
-        collection = db["records"]
+        collection = db[self.__collection]
         return collection
 
 
@@ -159,7 +159,7 @@ class Crud:
 
     """ Bulk data manipulation operation section """
 
-    def extraction(self):
+    def export_csv(self):
         """
         Extract all data in csv file
         """
