@@ -4,13 +4,12 @@ import uuid
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
 from app.model.model import finance_filter_entitys
+from app.databases.crud import Crud
 
 
-class Func():
-    def __init__(self, current_user: bool, collection_name):
-        self.current_user = current_user
-        self.collection_name = collection_name
-
+class Func(Crud):
+    def __init__(self, user):
+        super().__init__(user)
 
     def get_filtered_month(self, previous=False):
         current_date = datetime.date.today()
@@ -51,7 +50,10 @@ class Func():
         if month_value is not None:
             pipeline = [
                 {
-                    "$match": {"Month": month_value}
+                    "$match": {
+                        "user_id": self.user.user_id,
+                        "Month": month_value
+                    }
                 },
                 {
                     "$group": {
@@ -65,7 +67,12 @@ class Func():
             ]
         
         elif month_value is None:
-            pipeline = [ 
+            pipeline = [
+                {
+                    "$match": {
+                        "user_id": self.user.user_id
+                    }
+                },
                 {
                     "$group": {
                         "_id": None,
@@ -80,11 +87,11 @@ class Func():
 
         try:
             # get filtered summary of financial details based on month
-            rows = self.collection_name.aggregate(pipeline)
+            rows = self.get_collection_name().aggregate(pipeline)
 
             if rows:
                 docs = finance_filter_entitys(rows)
-                                
+
                 # if the list is empty
                 if len(docs) <= 0:
                     return finance_summary_block
@@ -110,4 +117,4 @@ class Func():
                 raise HTTPException(detail="Finance Details not allowed for this user!!!", status_code=401)
 
         except Exception as e:
-            raise HTTPException(detail=f"{e}", status_code=400)
+            raise HTTPException(detail=f"{e}", status_code=400) 

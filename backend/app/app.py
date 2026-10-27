@@ -26,8 +26,6 @@ app.include_router(data_router)
 # Current Active User Dependency for methods
 current_active_user = Annotated[User, Depends(get_current_active_user)]
 
-# Data Cluster
-data_cluster = 'Shop'
 
 # origins
 origins = [
@@ -57,7 +55,7 @@ def user_session(current_user: current_active_user):
 @app.get("/home")
 def get_logs(current_user: current_active_user):
     # CRUD operations instance
-    CRUD = Crud(user=current_user, data_cluster=data_cluster)
+    CRUD = Crud(user=current_user)
     result = CRUD.user_all_logs()
 
     if not result:
@@ -86,7 +84,7 @@ async def post_log(row: CreateLog, current_user: current_active_user):
 
     try:
         # Insert New Doc
-        CRUD = Crud(user=current_user, data_cluster=data_cluster)
+        CRUD = Crud(user=current_user)
         post = CRUD.new_post(new_doc_dict)
 
         return JSONResponse(content=f"Insertion Done Successfully!", status_code=201)
@@ -116,7 +114,7 @@ async def update_log(row: UpdateLog, current_user: current_active_user):
 
     try:
         # Update Document
-        CRUD = Crud(user=current_user, data_cluster=data_cluster)
+        CRUD = Crud(user=current_user)
         update_result = CRUD.update_post(updated_doc_dict)
         if update_result:
             return JSONResponse(content="Document Update Successfully", status_code=200)
@@ -134,7 +132,7 @@ async def update_log(row: UpdateLog, current_user: current_active_user):
 @app.get("/search/post/{query}")
 async def search_row(query, current_user: current_active_user):
     try:        
-        CRUD = Crud(user=current_user, data_cluster=data_cluster)
+        CRUD = Crud(user=current_user)
         search_result = CRUD.search_posts(query)
         # If no results found, return a formatted 404 message
         if not search_result:
@@ -157,7 +155,7 @@ def delete_log(row: DocumentID, current_user: current_active_user):
     post_id = post_data["id"]
 
     try:
-        CRUD = Crud(user=current_user, data_cluster=data_cluster)
+        CRUD = Crud(user=current_user)
         delete_result = CRUD.delete_post(post_id)
         if delete_result:
             return JSONResponse(content=f"Document delete successfully!", status_code=200)
@@ -179,7 +177,7 @@ async def delete_all_log(current_user: current_active_user):
 
 
     try:
-        CRUD = Crud(user=current_user, data_cluster=data_cluster)
+        CRUD = Crud(user=current_user)
         return JSONResponse(content="All documents deleted successfully")
     except Exception as e:
         raise HTTPException(detail=f"Error: {e}", status_code=400)
@@ -194,10 +192,8 @@ def get_previous(current_user: current_active_user):
     if not current_user.admin:
         raise HTTPException(status_code=405, detail="You are not allow for this operation!")
 
-    CRUD = Crud(user=current_user, data_cluster=data_cluster)
-    collection = CRUD.get_collection_name()
-    
-    month_filter = Func(current_user.admin, collection)
+
+    month_filter = Func(current_user)
     current_month_value = month_filter.finance_summary(summary_duration="current")
     previous_month_value = month_filter.finance_summary(summary_duration="previous")
     all_value = month_filter.finance_summary()

@@ -7,22 +7,21 @@ from app.model.model import super_home_entitys, home_entitys
 import pandas as pd
 
 class Crud:
-    def __init__(self, user, data_cluster):
+    def __init__(self, user):
         """
         Initial Arguments:
             user: Current User data class.
-            data_cluster: Name of the MongoDB Cluster for operations.
         """
         self.user = user
-        self.data_cluster = data_cluster
-        self.__collection = "records"
+        self.__data_cluster = 'Shop'
+        self.__collection = 'records'
 
 
     def get_collection_name(self):
         """
         Return the Collection Name for the Current User.
         """
-        db = conn[self.data_cluster]
+        db = conn[self.__data_cluster]
         collection = db[self.__collection]
         return collection
 
